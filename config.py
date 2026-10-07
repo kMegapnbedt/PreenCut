@@ -2,7 +2,11 @@ import os
 import torch
 
 # 设置Gradio临时目录
-os.environ['GRADIO_TEMP_DIR'] = '/data/tmp/gradio'
+os.environ.setdefault(
+    'GRADIO_TEMP_DIR',
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), 'temp', 'gradio'),
+)
+os.makedirs(os.environ['GRADIO_TEMP_DIR'], exist_ok=True)
 
 
 def get_available_gpus():

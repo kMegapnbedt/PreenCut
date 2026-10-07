@@ -3,11 +3,16 @@ from modules.processing_queue import ProcessingQueue
 from typing import Optional
 import os
 import uuid
+
+import config
 from pydantic import BaseModel
 from datetime import date
 from pathlib import Path
 
-temp_dir = os.environ["GRADIO_TEMP_DIR"]
+temp_dir = os.environ.get(
+    "GRADIO_TEMP_DIR",
+    os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "temp", "gradio"),
+)
 
 processing_queue = ProcessingQueue()
 files_dict = {}
@@ -26,7 +31,10 @@ class createTransribeTaskBody(BaseModel):
 def upload(file: UploadFile):
     today = date.today()
     date_str = date.strftime(today, "%Y/%m/%d")
-    file_ext = Path(file.filename).suffix
+    file_ext = Path(file.filename or "").suffix.lower()
+    if file_ext.lstrip('.') not in config.ALLOWED_EXTENSIONS:
+        raise HTTPException(status_code=400,
+                            detail=f"unsupported file type: {file_ext or 'unknown'}")
     uuid_ex = str(uuid.uuid1()).replace("-", "")
     save_dir = f"{temp_dir}/files/{date_str}"
     if not Path(save_dir).exists():
