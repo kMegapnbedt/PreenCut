@@ -31,16 +31,11 @@ def clear_directory_fast(directory_path):
 
 
 def seconds_to_hhmmss(seconds):
-    """将秒数转换为 HH:MM:SS 格式"""
-    seconds = float(seconds)  # 确保输入是浮点数
-    hours = int(seconds // 3600)
-    remaining_seconds = seconds % 3600
-    minutes = int(remaining_seconds // 60)
-    seconds_remaining = int(round(remaining_seconds % 60))  # 四舍五入秒数
-
-    # 格式化为两位数，不足补零
-    hhmmss = f"{hours:02d}:{minutes:02d}:{seconds_remaining:02d}"
-    return hhmmss
+    """Convert seconds to a zero-padded HH:MM:SS string."""
+    total_seconds = int(round(float(seconds)))
+    hours, remainder = divmod(total_seconds, 3600)
+    minutes, seconds_remaining = divmod(remainder, 60)
+    return f"{hours:02d}:{minutes:02d}:{seconds_remaining:02d}"
 
 
 def hhmmss_to_seconds(time_str):
@@ -61,19 +56,22 @@ def hhmmss_to_seconds(time_str):
 
 
 def get_audio_codec(input_file):
-    """使用 ffprobe 检测音频编码"""
+    """Return the first audio codec reported by ffprobe, or None when there is no audio."""
     cmd = [
         "ffprobe",
         "-v", "error",
-        "-select_streams", "a:0",  # 只检查第一个音频流
+        "-select_streams", "a:0",
         "-show_entries", "stream=codec_name",
         "-of", "json",
-        input_file
+        input_file,
     ]
     result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                             text=True)
-    info = json.loads(result.stdout)
-    return info["streams"][0]["codec_name"]
+    info = json.loads(result.stdout or "{}")
+    streams = info.get("streams") or []
+    if not streams:
+        return None
+    return streams[0].get("codec_name")
 
 
 def write_to_srt(align_result, max_line_length, output_dir,
