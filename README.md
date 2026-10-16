@@ -210,3 +210,11 @@ Run the utility tests with:
 pip install -r requirements-dev.txt
 python -m pytest -q
 ```
+
+## Environment
+
+| variable | default | purpose |
+|---|---|---|
+| `GRADIO_TEMP_DIR` | `temp/gradio` next to the code | where Gradio writes uploads and clips |
+| `PREENCUT_HOST` | `localhost` | bind address for `python main.py` |
+| `PREENCUT_PORT` | `7860` | port for `python main.py` |

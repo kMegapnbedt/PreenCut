@@ -33,6 +33,7 @@ class VideoProcessor:
         # 生成安全的文件名
         base_name = os.path.splitext(os.path.basename(input_path))[0]
         safe_filename = generate_safe_filename(base_name, max_length=100)
+        os.makedirs(output_folder, exist_ok=True)
 
         for i, seg in enumerate(segments):
             clip_path = os.path.join(output_folder,
@@ -50,7 +51,10 @@ class VideoProcessor:
             result = subprocess.run(cmd, capture_output=True, text=True)
             if result.returncode != 0:
                 print(f"FFmpeg error: {result.stderr}")
-                raise RuntimeError(f"视频剪辑失败: {result.stderr}")
+                raise RuntimeError(
+                    f"ffmpeg failed to clip {input_path} "
+                    f"[{seg.get('start')}-{seg.get('end')}]: {result.stderr.strip()}"
+                )
             clip_list.append(clip_path)
 
         return clip_list

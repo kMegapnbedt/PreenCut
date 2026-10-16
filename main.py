@@ -1,3 +1,5 @@
+import os
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import gradio as gr
@@ -66,4 +68,5 @@ app = gr.mount_gradio_app(app, gradio_app, path="")
 
 if __name__ == "__main__":
     # 启动应用
-    uvicorn.run(app, host="localhost", port=7860)
+    uvicorn.run(app, host=os.getenv("PREENCUT_HOST", "localhost"),
+                port=int(os.getenv("PREENCUT_PORT", "7860")))
